@@ -49,7 +49,7 @@ class UserMessage(models.Model):
         verbose_name_plural = verbose_name
 
 
-class userCourse(models.Model):
+class UserCourse(models.Model):
     user = models.ForeignKey(UserProfile, verbose_name='用户')
     course = models.ForeignKey(Course, verbose_name='课程')
     add_time = models.DateTimeField(default=datetime.now, verbose_name='添加时间')

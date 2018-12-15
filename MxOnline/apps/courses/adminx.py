@@ -12,7 +12,7 @@ class CourseAdmin:
 class LessonAdmin:
     list_display = ['course', 'name', 'add_time']
     search_fields = ['course', 'name']
-    list_filter = ['course', 'name', 'add_time']
+    list_filter = ['course__name', 'name', 'add_time']
 
 
 class VideoAdmin:

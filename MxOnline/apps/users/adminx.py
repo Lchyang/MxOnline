@@ -1,6 +1,20 @@
 import xadmin
+from xadmin import views
 
 from .models import EmailVerifyRecord, Banner
+
+
+class BaseSetting:
+    # xadmin 增加主题
+    enable_themes = True
+    use_bootswatch = True
+
+
+class GlobalSetting:
+    # xadmin 设置页眉，和页脚
+    site_title = '后台管理系统'
+    site_footer = '教育在线'
+    menu_style = 'accordion'   # 使app状态栏可折叠,要改变app的名字修改apps.py文件，并修改__init__.py
 
 
 class EmailVerifyRecordAdmin:
@@ -20,3 +34,5 @@ class BannerAdmin:
 
 xadmin.site.register(EmailVerifyRecord, EmailVerifyRecordAdmin)
 xadmin.site.register(Banner, BannerAdmin)
+xadmin.site.register(views.BaseAdminView, BaseSetting)     #注册 basesetting
+xadmin.site.register(views.CommAdminView, GlobalSetting)   #注册 globalsetting

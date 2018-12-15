@@ -45,10 +45,15 @@ INSTALLED_APPS = [
     'operation',
     'organization',
     'xadmin',
-    'crispy_forms', # 安装xadmin附属
-    'reversion'
+    'crispy_forms',  # 安装xadmin附属
+    'reversion',  # 安装xadmin附属
+    'captcha',  # 验证码
 ]
-AUTH_USER_MODEL = 'users.UserProfile'    #重载user模型，因为更改了user自带的模型
+AUTH_USER_MODEL = 'users.UserProfile'    # 重载user模型，因为更改了user自带的模型
+
+AUTHENTICATION_BACKENDS = (
+    'users.views.CustomBackend',
+)
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -65,7 +70,7 @@ ROOT_URLCONF = 'MxOnline.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  #配置模板路径
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -132,3 +137,15 @@ USE_TZ = False  # 数据库储存时间是否是国际时间
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# 配置静态文件地址
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),   # 元组必须有逗号
+)
+
+EMAIL_HOST = ''
+EMAIL_PORT = 25
+EMAIL_HOST_USER = '18831627116@163.com'
+EMAIL_HOST_PASSWORD = 'li720333'
+EMAIL_USE_TLS = False
+EMAIL_FROM = '18831627116@163.com'
