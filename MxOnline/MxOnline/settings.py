@@ -153,3 +153,7 @@ EMAIL_HOST_PASSWORD = 'li720333'
 EMAIL_PORT = 25
 EMAIL_USE_TLS = False
 EMAIL_FROM = 'eduproject@sina.com'
+
+
+MEDIA_URL = '/media/'  # 配置文件所在路径
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
