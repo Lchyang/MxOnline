@@ -16,12 +16,20 @@ Including another URLconf
 import xadmin
 from django.conf.urls import url, include
 from django.views.generic import TemplateView
-from users.views import LoginView, RegisterView
+from users.views import LoginView, RegisterView, ActivateRegisterView, ForgetPwdView, RevertPwdView, InputPwdView
+from users.views import LogoutView
 
 urlpatterns = [
     url(r'^xadmin/', xadmin.site.urls),
     url(r'^captcha/', include('captcha.urls')),
     url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
     url(r'^login/$', LoginView.as_view(), name='login'),
-    url(r'^register/$', RegisterView.as_view(), name='register')
+    url(r'^logout/$', LogoutView.as_view(), name='logout'),
+    url(r'^register/$', RegisterView.as_view(), name='register'),
+    # 将active后面的字符获取到传给activate_code变量。
+    url(r'active/(?P<activate_code>.*)/$', ActivateRegisterView.as_view(), name = 'register_activate'),
+    url(r'^forget/$', ForgetPwdView.as_view(), name='forget_pwd'),
+    url(r'revert/(?P<activate_code>.*)/$', RevertPwdView.as_view(), name = 'revert_pwd'),
+    url(r'^input/$', InputPwdView.as_view(), name='input_pwd'),
+
 ]

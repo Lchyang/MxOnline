@@ -11,4 +11,17 @@ class LoginForm(forms.Form):
 class RegisterForm(forms.Form):
     email = forms.EmailField(required=True)
     password = forms.CharField(required=True, min_length=6)
+    # 用于验证码的验证
     captcha = CaptchaField()
+
+
+class ForgetPwdForm(forms.Form):
+    email = forms.EmailField(required=True)
+    # 用于验证码的验证
+    captcha = CaptchaField()
+
+
+class InputPwdForm(forms.Form):
+    password1 = forms.CharField(required=True, min_length=6)
+    password2 = forms.CharField(required=True, min_length=6)
+    email = forms.EmailField(required=True)

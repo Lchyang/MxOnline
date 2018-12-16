@@ -143,9 +143,13 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),   # 元组必须有逗号
 )
 
-EMAIL_HOST = ''
-EMAIL_PORT = 25
-EMAIL_HOST_USER = '18831627116@163.com'
+#邮件发送配置
+EMAIL_HOST = 'smtp.sina.com'
+# 邮箱
+EMAIL_HOST_USER = 'eduproject@sina.com'
+# 授权码
 EMAIL_HOST_PASSWORD = 'li720333'
+# 端口
+EMAIL_PORT = 25
 EMAIL_USE_TLS = False
-EMAIL_FROM = '18831627116@163.com'
+EMAIL_FROM = 'eduproject@sina.com'
