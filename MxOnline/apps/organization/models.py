@@ -20,6 +20,8 @@ class CourseOrg(models.Model):
     name = models.CharField(max_length=50, verbose_name='机构名')
     category = models.CharField(max_length=50, default='pxjg',
                                 choices=(('pxjg', '培训机构'), ('gr', '个人'), ('gx', '高校')))
+    courses = models.IntegerField(default=0, verbose_name='课程数')
+    students = models.IntegerField(default=0, verbose_name='学习人数')
     desc = models.TextField(verbose_name='描述')
     click_nums = models.IntegerField(default=0, verbose_name='点击数')
     fav_nums = models.IntegerField(default=0, verbose_name='收藏数')
@@ -45,6 +47,7 @@ class Teacher(models.Model):
     points = models.CharField(max_length=50, verbose_name='教学特点')
     click_nums = models.IntegerField(default=0, verbose_name='点击数')
     fav_nums = models.IntegerField(default=0, verbose_name='收藏数')
+    image = models.ImageField(default='', upload_to='teacher/%Y/%m', verbose_name='头像')
     add_time = models.DateTimeField(default=datetime.now, verbose_name='添加时间')
 
     class Meta:

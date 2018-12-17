@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'crispy_forms',  # 安装xadmin附属
     'reversion',  # 安装xadmin附属
     'captcha',  # 验证码
+    'pure_pagination',  # 分页
 ]
 AUTH_USER_MODEL = 'users.UserProfile'    # 重载user模型，因为更改了user自带的模型
 
@@ -78,6 +79,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',   # 配置文件上传路径时需要
             ],
         },
     },

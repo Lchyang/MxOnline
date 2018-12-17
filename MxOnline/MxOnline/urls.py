@@ -22,7 +22,7 @@ from MxOnline.settings import MEDIA_ROOT
 
 from users.views import LoginView, LogoutView, RegisterView, ActivateRegisterView, \
     ForgetPwdView, RevertPwdView, InputPwdView
-from organization.views import OrgView
+
 
 urlpatterns = [
     url(r'^xadmin/', xadmin.site.urls),
@@ -40,8 +40,7 @@ urlpatterns = [
     # 输入重置密码
     url(r'^input/$', InputPwdView.as_view(), name='input_pwd'),
 
-    # 课程机构首页
-    url(r'^org_list/$', OrgView.as_view(), name='org_list'),
+    url(r'^org/', include('organization.urls', namespace='org')),
 
     # 配置上传文件的访问处理函数
     url(r'^media/(?P<path>.*)$', serve, {'document_root': MEDIA_ROOT})
