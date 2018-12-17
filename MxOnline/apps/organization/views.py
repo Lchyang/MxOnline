@@ -163,7 +163,3 @@ class AddFavView(View):
                 return JsonResponse({'status': 'success', 'msg': '收藏成功'})
             else:
                 return JsonResponse({'status': 'fail', 'msg': '收藏出错'})
-
-
-
-
