@@ -5,7 +5,8 @@ from django.views.generic.base import View
 from django.http import JsonResponse
 
 from .models import Course, CourseResource
-from operation.models import UserFavorite, CourseComments
+from operation.models import UserFavorite, CourseComments, UserCourse
+from utils.mixin_utils import LoginRequireMixin
 
 
 class CourseListView(View):
@@ -69,23 +70,41 @@ class CourseDetailView(View):
         })
 
 
-class CourseVideoView(View):
+class CourseVideoView(LoginRequireMixin, View):
     # 课程章节和视频页面信息
     def get(self, request, course_id):
         courses = Course.objects.get(id=int(course_id))
         course_resources = CourseResource.objects.filter(course=courses)
+
+        learn_course = UserCourse.objects.filter(user=request.user, course=courses)
+        if not learn_course:
+            course = UserCourse()
+            course.user = request.user
+            course.course = courses
+            course.save()
+
+        user_courses = UserCourse.objects.filter(course=courses)  # 过滤出相同course的usercourse对象
+        user_id = [user_course.user.id for user_course in user_courses]  # 获取所有usercourse对象中user的id
+        # user_id__in表示可以遍历user_id中的元素然后进行查找, 根据用户找到所有usercourse对象
+        all_user_courses =  UserCourse.objects.filter(user_id__in=user_id)
+        # 根据所有usercourse对象找到所有course的ID
+        course_ids = [user_course.course.id for user_course in all_user_courses]
+        # 取出所有的course
+        all_courses = Course.objects.filter(id__in=course_ids).order_by('-click_nums')
+
         return render(request, 'course-video.html', {
             'courses': courses,
             'course_resources': course_resources,
+            'all_courses': all_courses,
         })
 
 
-class CourseCommentView(View):
+class CourseCommentView(LoginRequireMixin, View):
     # 课程评论页面信息
     def get(self, request, course_id):
         courses = Course.objects.get(id=int(course_id))
         course_resources = CourseResource.objects.filter(course=courses)
-        all_comments = CourseComments.objects.all().order_by('-add_time')
+        all_comments = CourseComments.objects.filter(course=courses).order_by('-add_time')
         return render(request, 'course-comment.html', {
             'courses': courses,
             'course_resources': course_resources,
