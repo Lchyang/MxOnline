@@ -41,6 +41,7 @@ urlpatterns = [
     url(r'^input/$', InputPwdView.as_view(), name='input_pwd'),
 
     url(r'^org/', include('organization.urls', namespace='org')),
+    url(r'^courses/', include('courses.urls', namespace='courses')),
 
     # 配置上传文件的访问处理函数
     url(r'^media/(?P<path>.*)$', serve, {'document_root': MEDIA_ROOT})
