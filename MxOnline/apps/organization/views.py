@@ -4,9 +4,9 @@ from django.http import JsonResponse
 
 from pure_pagination import Paginator, PageNotAnInteger
 
-from .models import CourseOrg, CityDict
+from .models import CourseOrg, CityDict, Teacher
 from .forms import UserAskForm
-from operation.models import UserFavorite
+from operation.models import UserFavorite, Course
 
 
 class OrgView(View):
@@ -163,3 +163,56 @@ class AddFavView(View):
                 return JsonResponse({'status': 'success', 'msg': '收藏成功'})
             else:
                 return JsonResponse({'status': 'fail', 'msg': '收藏出错'})
+
+
+class TeacherListView(View):
+    def get(self, request):
+        teachers = Teacher.objects.all()
+        hot_teachers = teachers.order_by('-click_nums')[:3]
+        sort = request.GET.get('sort', '')
+
+        if sort:
+            if sort == 'hot':
+                teachers = teachers.order_by('-click_nums')
+
+        # 对讲师列表进行分页
+        try:
+            page = request.GET.get('page', 1)
+        except PageNotAnInteger:
+            page = 1
+
+        # Provide Paginator with the request object for complete querystring generation
+
+        p = Paginator(teachers, 2, request=request)
+        teachers = p.page(page)
+
+        return render(request, 'teachers-list.html', {
+            'teachers': teachers,
+            'sort': sort,
+            'hot_teachers': hot_teachers,
+        })
+
+
+class TeacherDetailView(View):
+    def get(self, request, teacher_id):
+        teacher = Teacher.objects.get(id=teacher_id)
+        courses = Course.objects.filter(teacher=teacher)
+        hot_teachers = Teacher.objects.all().order_by('-click_nums')[:3]
+
+        teacher_fav = False
+        org_fav = False
+
+        if request.user.is_authenticated():
+            if UserFavorite.objects.filter(user=request.user, fav_id=teacher.id, fav_type=int(3)):
+                teacher_fav = True
+            if UserFavorite.objects.filter(user=request.user, fav_id=teacher.id, fav_type=int(2)):
+                org_fav = True
+
+        return render(request, 'teacher-detail.html', {
+            'teacher': teacher,
+            'courses': courses,
+            'hot_teachers': hot_teachers,
+            'teacher_fav': teacher_fav,
+            'org_fav': org_fav,
+
+        })
