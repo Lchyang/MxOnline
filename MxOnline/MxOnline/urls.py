@@ -41,7 +41,7 @@ urlpatterns = [
     url(r'^input/$', InputPwdView.as_view(), name='input_pwd'),
 
     url(r'^org/', include('organization.urls', namespace='org')),
-    url(r'^courses/', include('courses.urls', namespace='courses')),
+    url(r'^course/', include('courses.urls', namespace='courses')),
     url(r'^teachers/', include('organization.urls', namespace='teachers')),
 
     # 配置上传文件的访问处理函数
