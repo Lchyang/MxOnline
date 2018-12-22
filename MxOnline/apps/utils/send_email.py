@@ -17,7 +17,10 @@ def random_str(random_len=8):
 
 
 def send_register_email(email, send_type='register'):
-    code = random_str(16)  # 生成随机字符串
+    if send_type == 'update':
+        code = random_str(6)
+    else:
+        code = random_str(16)  # 生成随机字符串
     email_record = EmailVerifyRecord()
     email_record.code = code   # 将随机字符串、邮箱、发送类型、保存到同一个表中，在emailverifyrecord(),和user_profile()
     email_record.email = email   # 都存在同一个邮箱可以通过邮箱进行两个表的交互。
@@ -36,6 +39,12 @@ def send_register_email(email, send_type='register'):
         email_title = '在线教育网注册重置密码链接'
         email_body = '请点击下面的链接重置您的密码 http://127.0.0.1:8000/revert/{}'.format(code)
         # 通过send_mail函数发送邮件返回一个布尔值
+        send_status = send_mail(email_title, email_body, EMAIL_FROM, [email])
+        if send_status:
+            pass
+    if send_type == 'update':
+        email_title = '在线教育网注册更新邮箱链接'
+        email_body = '你的验证码是{}'.format(code)
         send_status = send_mail(email_title, email_body, EMAIL_FROM, [email])
         if send_status:
             pass

@@ -4,10 +4,16 @@ from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 from django.views.generic.base import View
 from django.contrib.auth.hashers import make_password
+from django.http.response import JsonResponse
 
 from .models import UserProfile, EmailVerifyRecord
-from .forms import LoginForm, RegisterForm, ForgetPwdForm, InputPwdForm
+from operation.models import UserCourse, UserFavorite
+from organization.models import CourseOrg
+from .forms import LoginForm, RegisterForm, ForgetPwdForm, InputPwdForm, ImageUploadForm, \
+    RevertPwdForm, UserInfoForm
+from courses.models import Course, Teacher
 from utils.send_email import send_register_email
+from utils.mixin_utils import LoginRequireMixin
 
 
 class CustomBackend(ModelBackend):
@@ -133,6 +139,7 @@ class RegisterView(View):
 
 
 class ForgetPwdView(View):
+    # 忘记密码页面
     def get(self, request):
         forget_form = ForgetPwdForm()
         return render(request, 'forgetpwd.html', {'forget_form': forget_form})
@@ -151,6 +158,7 @@ class ForgetPwdView(View):
 
 
 class RevertPwdView(View):
+    # 进入重置密码页面
     def get(self, request, activate_code):
         all_records = EmailVerifyRecord.objects.filter(code=activate_code)
         if all_records:
@@ -162,6 +170,7 @@ class RevertPwdView(View):
 
 
 class InputPwdView(View):
+    # 重置密码时输入密码
     def post(self, request):
         input_form = InputPwdForm(request.POST)
         if input_form.is_valid():
@@ -177,3 +186,124 @@ class InputPwdView(View):
         else:
             email = request.POST.get('email', '')
             return render(request, 'password_reset.html', {'input_form': input_form, 'email': email})
+
+
+class UserInfoView(LoginRequireMixin, View):
+    def get(self, request):
+        return render(request, 'usercenter-info.html', {})
+
+    def post(self, request):
+        user_form = UserInfoForm(request.POST, instance=request.user)
+        if user_form.is_valid():
+            user_form.save()
+            return JsonResponse({'status': 'success'})
+        else:
+            return JsonResponse(user_form.errors)
+
+
+class ImageUploadView(LoginRequireMixin, View):
+    # 上传用户头像
+    def post(self, request):
+        # 要对request.FILES进行验证，因为图片经过它上传
+        upload_form = ImageUploadForm(request.POST, request.FILES)
+        if upload_form.is_valid():
+            image = upload_form.cleaned_data.get('image', '')
+            if image:
+                request.user.image = image
+                request.user.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'status': 'fail'})
+        else:
+            return JsonResponse({'status': 'fail'})
+
+
+class PwdChangeView(LoginRequireMixin, View):
+    # 用户个人中心修改密码, 当表单为ajax格式时必须返回json
+    def post(self, request):
+        input_form = RevertPwdForm(request.POST)
+        if input_form.is_valid():
+            password1 = request.POST.get('password1', '')
+            password2 = request.POST.get('password2', '')
+            if password1 != password2:
+                return JsonResponse({'status': 'fail', 'msg': '密码不一致'})
+            user = request.user
+            user.password = make_password(password2)
+            user.save()
+            return JsonResponse({'status': 'success', 'msg': '密码修改成功'})
+        else:
+            # 返回表单验证中的错误信息
+            return JsonResponse(input_form.errors)
+
+
+class EmailSendCodeView(LoginRequireMixin, View):
+    # 个人中心修改邮箱发送验证码
+    def get(self, request):
+        email = request.GET.get('email', '')
+        exit_email = UserProfile.objects.filter(email=email)
+        if exit_email:
+            return JsonResponse({'email': '邮箱已经存在'})
+        else:
+            send_register_email(email, 'update')
+            return JsonResponse({'status': 'success', 'msg': '验证码已经发送'})
+
+
+class EmailUpdateView(LoginRequireMixin, View):
+    # 个人中心修改邮箱保存邮箱
+    def post(self, request):
+        email = request.POST.get('email', '')
+        code = request.POST.get('code', '')
+        verify_email = EmailVerifyRecord.objects.filter(email=email, code=code)
+        if verify_email:
+            request.user.email = email
+            request.user.save()
+            return JsonResponse({'status': 'success'})
+        else:
+            return JsonResponse({'email': '邮箱更改失败'})
+
+
+class CoursesView(LoginRequireMixin, View):
+    # 个人中心我的课程
+    def get(self, request):
+        courses = UserCourse.objects.filter(user=request.user)
+        return render(request, 'usercenter-mycourse.html', {
+            'courses': courses,
+        })
+
+
+class FavoriteCoursesView(LoginRequireMixin, View):
+    # 个人中心收藏课程
+    def get(self, request):
+        fav_courses_id = UserFavorite.objects.filter(user=request.user, fav_type=1)
+        fav_id = [fav_course.fav_id for fav_course in fav_courses_id]
+        courses = Course.objects.filter(id__in=fav_id)
+        return render(request, 'usercenter-fav-course.html', {
+            'courses': courses,
+        })
+
+
+class FavoriteTeachersView(LoginRequireMixin, View):
+    # 个人中心收藏教师
+    def get(self, request):
+        fav_teachers_id = UserFavorite.objects.filter(user=request.user, fav_type=3)
+        fav_id = [fav_teacher.fav_id for fav_teacher in fav_teachers_id]
+        teachers = Teacher.objects.filter(id__in=fav_id)
+        return render(request, 'usercenter-fav-teacher.html', {
+            'teachers': teachers,
+        })
+
+
+class FavoriteOrgsView(LoginRequireMixin, View):
+    # 个人中心收藏机构
+    def get(self, request):
+        fav_orgs_id = UserFavorite.objects.filter(user=request.user, fav_type=2)
+        fav_id = [fav_org.fav_id for fav_org in fav_orgs_id]
+        orgs = CourseOrg.objects.filter(id__in=fav_id)
+        return render(request, 'usercenter-fav-org.html', {
+            'orgs': orgs,
+        })
+
+
+class MessagesView(LoginRequireMixin, View):
+    def get(self, request):
+        return render(request, 'usercenter-fav-course.html', {})

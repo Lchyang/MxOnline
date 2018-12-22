@@ -30,7 +30,9 @@ class UserProfile(AbstractUser):
 class EmailVerifyRecord(models.Model):
     code = models.CharField(max_length=50, verbose_name='验证码')
     email = models.EmailField(max_length=30, verbose_name='邮箱')
-    send_type = models.CharField('验证码类型', choices=(('register', '注册'), ('forget', '找回密码')), max_length=100)
+    send_type = models.CharField('验证码类型', choices=(('register', '注册'),
+                                                   ('forget', '找回密码'),
+                                                   ('update', '更新邮箱')), max_length=100)
     # datetime.now不能带括号 带括号是实例化时的时间
     send_time = models.DateTimeField('发送时间', default=datetime.now)
 
