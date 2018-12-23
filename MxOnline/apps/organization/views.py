@@ -194,6 +194,7 @@ class TeacherListView(View):
 
 
 class TeacherDetailView(View):
+    # 教师详情页
     def get(self, request, teacher_id):
         teacher = Teacher.objects.get(id=teacher_id)
         courses = Course.objects.filter(teacher=teacher)
@@ -214,5 +215,4 @@ class TeacherDetailView(View):
             'hot_teachers': hot_teachers,
             'teacher_fav': teacher_fav,
             'org_fav': org_fav,
-
         })
