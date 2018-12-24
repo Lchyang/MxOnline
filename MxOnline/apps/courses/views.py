@@ -83,8 +83,10 @@ class CourseVideoView(LoginRequireMixin, View):
     # 课程章节和视频页面信息
     def get(self, request, course_id):
         courses = Course.objects.get(id=int(course_id))
+        courses.learn_nums += 1
+        courses.save()
         course_resources = CourseResource.objects.filter(course=courses)
-
+        # 查询用户是否关联了课程
         learn_course = UserCourse.objects.filter(user=request.user, course=courses)
         if not learn_course:
             course = UserCourse()

@@ -151,6 +151,25 @@ class AddFavView(View):
         exit_fav = UserFavorite.objects.filter(user=user, fav_id=int(fav_id), fav_type=int(fav_type))
         if exit_fav:
             exit_fav.delete()
+            if int(fav_type) == 1:
+                course = Course.objects.get(id=int(fav_id))
+                course.dev_nums -= 1
+                if course.dev_nums < 0:
+                    course.dev_nums = 0
+                course.save()
+            if int(fav_type) == 2:
+                course_org = CourseOrg.objects.get(id=int(fav_id))
+                course_org.dev_nums -= 1
+                if course_org.dev_nums < 0:
+                    course_org.dev_nums = 0
+                course_org.save()
+            if int(fav_type) == 3:
+                teacher = Teacher.objects.get(id=int(fav_id))
+                teacher.dev_nums -= 1
+                if teacher.dev_nums < 0:
+                    teacher.dev_nums = 0
+                teacher.save()
+
             return JsonResponse({'status': 'success', 'msg': '取消收藏成功'})
         else:
             # 如果没有收藏则把数据保存到数据库，字段要填写完整。
@@ -160,6 +179,25 @@ class AddFavView(View):
                 user_fav.fav_id = int(fav_id)
                 user_fav.fav_type = int(fav_type)
                 user_fav.save()
+                # 数据库收藏数加一
+                if int(fav_type) == 1:
+                    course = Course.objects.get(id=int(fav_id))
+                    course.dev_nums += 1
+                    if course.dev_nums < 0:
+                        course.dev_nums = 0
+                    course.save()
+                if int(fav_type) == 2:
+                    course_org = CourseOrg.objects.get(id=int(fav_id))
+                    course_org.dev_nums += 1
+                    if course_org.dev_nums < 0:
+                        course_org.dev_nums = 0
+                    course_org.save()
+                if int(fav_type) == 3:
+                    teacher = Teacher.objects.get(id=int(fav_id))
+                    teacher.dev_nums += 1
+                    if teacher.dev_nums < 0:
+                        teacher.dev_nums = 0
+                    teacher.save()
                 return JsonResponse({'status': 'success', 'msg': '收藏成功'})
             else:
                 return JsonResponse({'status': 'fail', 'msg': '收藏出错'})
@@ -197,6 +235,8 @@ class TeacherDetailView(View):
     # 教师详情页
     def get(self, request, teacher_id):
         teacher = Teacher.objects.get(id=teacher_id)
+        teacher.click_nums += 1
+        teacher.save()
         courses = Course.objects.filter(teacher=teacher)
         hot_teachers = Teacher.objects.all().order_by('-click_nums')[:3]
 

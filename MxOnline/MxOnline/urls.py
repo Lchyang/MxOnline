@@ -21,7 +21,7 @@ from django.views.static import serve
 from MxOnline.settings import MEDIA_ROOT
 
 from users.views import LoginView, LogoutView, RegisterView, ActivateRegisterView, \
-    ForgetPwdView, RevertPwdView, InputPwdView
+    ForgetPwdView, RevertPwdView, InputPwdView, IndexView
 
 
 urlpatterns = [
@@ -29,14 +29,15 @@ urlpatterns = [
     # 配置验证码
     url(r'^captcha/', include('captcha.urls')),
     # 直接返回模板不用通过view
-    url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
+    # url(r'^$', TemplateView.as_view(template_name='index.html'), name='index'),
+    url(r'^$', IndexView.as_view(), name='index'),
     url(r'^login/$', LoginView.as_view(), name='login'),
     url(r'^logout/$', LogoutView.as_view(), name='logout'),
     url(r'^register/$', RegisterView.as_view(), name='register'),
     # 获取url中变量，将active后面的字符获取到传给activate_code变量。
-    url(r'active/(?P<activate_code>.*)/$', ActivateRegisterView.as_view(), name = 'register_activate'),
+    url(r'active/(?P<activate_code>.*)/$', ActivateRegisterView.as_view(), name='register_activate'),
     url(r'^forget/$', ForgetPwdView.as_view(), name='forget_pwd'),
-    url(r'revert/(?P<activate_code>.*)/$', RevertPwdView.as_view(), name = 'revert_pwd'),
+    url(r'revert/(?P<activate_code>.*)/$', RevertPwdView.as_view(), name='revert_pwd'),
     # 输入重置密码
     url(r'^input/$', InputPwdView.as_view(), name='input_pwd'),
 
@@ -47,7 +48,4 @@ urlpatterns = [
 
     # 配置上传文件的访问处理函数
     url(r'^media/(?P<path>.*)$', serve, {'document_root': MEDIA_ROOT})
-
-
-
 ]

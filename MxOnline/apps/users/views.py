@@ -4,14 +4,14 @@ from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 from django.views.generic.base import View
 from django.contrib.auth.hashers import make_password
-from django.http.response import JsonResponse
+from django.http.response import JsonResponse, HttpResponseRedirect
 
-from .models import UserProfile, EmailVerifyRecord
-from operation.models import UserCourse, UserFavorite
+from .models import UserProfile, EmailVerifyRecord, Banner
+from operation.models import UserCourse, UserFavorite, UserMessage
 from organization.models import CourseOrg
+from courses.models import Course, Teacher
 from .forms import LoginForm, RegisterForm, ForgetPwdForm, InputPwdForm, ImageUploadForm, \
     RevertPwdForm, UserInfoForm
-from courses.models import Course, Teacher
 from utils.send_email import send_register_email
 from utils.mixin_utils import LoginRequireMixin
 
@@ -66,7 +66,11 @@ class LoginView(View):
 class LogoutView(View):
     def get(self, request):
         logout(request)
-        return render(request, 'index.html')
+        from django.core.urlresolvers import reverse
+        # 通过httpresponse 和 reverse 进行url重定向
+        return HttpResponseRedirect(reverse('index'))
+
+        # return render(request, 'index.html')
 
 
 # 基于函数视图
@@ -131,6 +135,12 @@ class RegisterView(View):
             user_profile.password = make_password(pass_word)  # 密码用密文保存，需要调用make_password()方法
             user_profile.is_active = False  # 此时只是注册用户没有通过邮箱激活所以is_activate()设为false
             user_profile.save()
+
+            # 写入注册消息
+            message = UserMessage()
+            message.user = user_profile.id
+            message.message = '欢迎注册'
+            message.save()
 
             send_register_email(user_name, 'register')  # 向用户发送邮件 进入发送邮件的逻辑
             return render(request, 'login.html')  # 邮件发送成功之后返回登录页面
@@ -306,4 +316,28 @@ class FavoriteOrgsView(LoginRequireMixin, View):
 
 class MessagesView(LoginRequireMixin, View):
     def get(self, request):
-        return render(request, 'usercenter-fav-course.html', {})
+        user_messages = UserMessage.objects.filter(user=request.user.id).order_by('-add_time')
+
+        # 用户进入个人消息后清空未读消息记录
+        all_unread_messages = UserMessage.objects.filter(user=request.user.id, has_read=False)
+        for unread_message in all_unread_messages:
+            unread_message.has_read = True
+            unread_message.save()
+
+        return render(request, 'usercenter-message.html', {
+            'user_messages': user_messages,
+        })
+
+
+class IndexView(View):
+    def get(self, request):
+        banners = Banner.objects.all().order_by('index')[:5]
+        courses = Course.objects.filter(is_banner=False)[:6]
+        banner_course = Course.objects.filter(is_banner=True)[:2]
+        orgs = CourseOrg.objects.all()[:10]
+        return render(request, 'index.html', {
+            'banners': banners,
+            'courses': courses,
+            'banner_course': banner_course,
+            'orgs': orgs,
+        })

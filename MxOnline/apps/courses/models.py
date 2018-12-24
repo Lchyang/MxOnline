@@ -9,6 +9,7 @@ class Course(models.Model):
     teacher = models.ForeignKey(Teacher, verbose_name='教师', null=True, blank=True)
     name = models.CharField(max_length=100, verbose_name='课程名')
     desc = models.CharField(max_length=300, verbose_name='描述')
+    is_banner = models.BooleanField(default=False, verbose_name='是否是轮播图')
     degree = models.CharField(choices=(('cj', '初级'), ('zj', '中级'), ('gj', '高级')), max_length=2, verbose_name='课程难度')
     learn_nums = models.IntegerField(default=0, verbose_name='学习人数')
     dev_nums = models.IntegerField(default=0, verbose_name='收藏人数')
