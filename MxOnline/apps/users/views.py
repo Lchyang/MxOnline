@@ -5,6 +5,8 @@ from django.db.models import Q
 from django.views.generic.base import View
 from django.contrib.auth.hashers import make_password
 from django.http.response import JsonResponse, HttpResponseRedirect
+from django.core.urlresolvers import reverse
+from django.shortcuts import render_to_response
 
 from .models import UserProfile, EmailVerifyRecord, Banner
 from operation.models import UserCourse, UserFavorite, UserMessage
@@ -53,7 +55,8 @@ class LoginView(View):
                 if user.is_active:
                     # login将用户登录
                     login(request, user)
-                    return render(request, 'index.html')
+                    # 重定向到主页面
+                    return HttpResponseRedirect(reverse('index'))
                 else:
                     return render(request, 'login.html', {'msg': '用户未激活'})
             else:
@@ -66,7 +69,6 @@ class LoginView(View):
 class LogoutView(View):
     def get(self, request):
         logout(request)
-        from django.core.urlresolvers import reverse
         # 通过httpresponse 和 reverse 进行url重定向
         return HttpResponseRedirect(reverse('index'))
 
@@ -330,7 +332,9 @@ class MessagesView(LoginRequireMixin, View):
 
 
 class IndexView(View):
+    # 主页面
     def get(self, request):
+        print(1/0)
         banners = Banner.objects.all().order_by('index')[:5]
         courses = Course.objects.filter(is_banner=False)[:6]
         banner_course = Course.objects.filter(is_banner=True)[:2]
@@ -341,3 +345,18 @@ class IndexView(View):
             'banner_course': banner_course,
             'orgs': orgs,
         })
+
+
+def page_not_found(request):
+    # 全局404页面
+    response = render_to_response('404.html', {})
+    response.status_code = 404
+    return response
+
+
+def page_error(request):
+    # 全局500页面
+    response = render_to_response('500.html', {})
+    response.status_code = 500
+    return response
+

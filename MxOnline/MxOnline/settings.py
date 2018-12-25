@@ -28,7 +28,7 @@ SECRET_KEY = '%vq)o7*2qg#f0ng2)3%9x8k52=yona6p+510a!&6&-py(ybo=3'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -159,3 +159,6 @@ EMAIL_FROM = 'eduproject@sina.com'
 
 MEDIA_URL = '/media/'  # 配置文件所在路径
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
